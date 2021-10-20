@@ -34,7 +34,7 @@ def page_not_found(e):
     return "<h1>404</h1><p>The resource could not be found.</p>", 404
 
 
-@app.route('/api/v1/resources/clients', methods=['GET'])
+@app.route('/api/v1/resources/clients/consult', methods=['GET'])
 def api_filter():
     query_parameters = request.args
     print(request.args)
