@@ -1,6 +1,6 @@
 http://127.0.0.1:5000//api/v1/resources/clients/all
-http://127.0.0.1:5000//api/v1/resources/clients?country=CO
-http://127.0.0.1:5000//api/v1/resources/clients?region=NAM
-http://127.0.0.1:5000//api/v1/resources/clients?country=SV
-http://127.0.0.1:5000//api/v1/resources/clients?customer=COLOMBINA
+http://127.0.0.1:5000//api/v1/resources/clients/consult?country=CO
+http://127.0.0.1:5000//api/v1/resources/clients/consult?region=NAM
+http://127.0.0.1:5000//api/v1/resources/clients/consult?country=SV
+http://127.0.0.1:5000//api/v1/resources/clients/consult?customer=COLOMBINA
 
