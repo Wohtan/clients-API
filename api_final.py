@@ -53,7 +53,7 @@ def api_filter():
     query = "SELECT * FROM clients WHERE"
     to_filter = []
     customer,country,region,sp,sh,sort = get_parameters()
-    
+
     if customer:
         query += f' customer LIKE? AND'
         customer = '%' + customer + '%'
@@ -80,23 +80,35 @@ def api_filter():
         query = query[:-4] 
 
 ## Verificadores
-    print(query)
-    print(to_filter)
+    # print(query)
+    # print(to_filter)
     
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
     cur = conn.cursor()
-
     results = cur.execute(query, to_filter).fetchall()
-
-
+    conn.close()
     return jsonify(results)
 
 ##Delete clients:
 
-@app.route('/api/v1/resources/clients/delete', methods=['DELETE'])
+@app.route('/api/v1/resources/clients/delete', methods=['GET','DELETE'])
 def api_delete():
-    api_filter()
-    
+    query_parameters = request.args
+    id = query_parameters.get("id")
+    query = f"DELETE from clients where id = {id}"
+
+    conn = sqlite3.connect('clients.db')
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+
+    nombre = cur.execute(f"SELECT customer from clients where id = {id}").fetchall()[0]
+    cur.execute(query)
+    mensaje = f"El cliente {nombre['customer']} ha sido eliminado de la base de datos"
+
+    conn.commit()
+    conn.close()
+
+    return mensaje
 
 app.run()
