@@ -1,3 +1,4 @@
+from os import spawnl
 import flask
 from flask import request, jsonify
 import sqlite3
@@ -11,6 +12,18 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
+def get_parameters():
+    query_parameters = request.args
+    # print(request.args)
+    customer = query_parameters.get('customer')
+    country = query_parameters.get('country')
+    region = query_parameters.get('region')
+    sp = query_parameters.get('sp')
+    sh = query_parameters.get('sh')
+    sort = query_parameters.get('sort')
+    parameters = [customer,country,region,sp,sh,sort]
+    return parameters
+   
 
 @app.route('/', methods=['GET'])
 def home():
@@ -33,21 +46,14 @@ def api_all():
 def page_not_found(e):
     return "<h1>404</h1><p>The resource could not be found.</p>", 404
 
+##Consult clients
 
 @app.route('/api/v1/resources/clients/consult', methods=['GET'])
 def api_filter():
-    query_parameters = request.args
-    print(request.args)
-    customer = query_parameters.get('customer')
-    country = query_parameters.get('country')
-    region = query_parameters.get('region')
-    sp = query_parameters.get('sp')
-    sh = query_parameters.get('sh')
-    sort = query_parameters.get('sort')
-
     query = "SELECT * FROM clients WHERE"
     to_filter = []
-
+    customer,country,region,sp,sh,sort = get_parameters()
+    
     if customer:
         query += f' customer LIKE? AND'
         customer = '%' + customer + '%'
@@ -73,7 +79,7 @@ def api_filter():
     if query.endswith("AND"):
         query = query[:-4] 
 
-
+## Verificadores
     print(query)
     print(to_filter)
     
@@ -85,5 +91,12 @@ def api_filter():
 
 
     return jsonify(results)
+
+##Delete clients:
+
+@app.route('/api/v1/resources/clients/delete', methods=['DELETE'])
+def api_delete():
+    api_filter()
+    
 
 app.run()
