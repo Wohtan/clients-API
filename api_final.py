@@ -1,10 +1,12 @@
 from os import spawnl
 import flask
-from flask import request, jsonify
+from flask import request, jsonify, render_template, redirect, url_for
 import sqlite3
 
 app = flask.Flask(__name__)
-app.config["DEBUG"] = True
+
+if __name__ == "__main__":
+    app.config["DEBUG"] = True
 
 def dict_factory(cursor, row):
     d = {}
@@ -39,7 +41,6 @@ def api_all():
     all_clients = cur.execute('SELECT * FROM clients;').fetchall()
 
     return jsonify(all_clients)
-
 
 
 @app.errorhandler(404)
@@ -110,5 +111,35 @@ def api_delete():
     conn.close()
 
     return mensaje
+
+@app.route('/api/v1/resources/clients/create')
+def formulario():
+    return render_template("create.html")
+
+@app.route('/api/v1/resources/clients/create/added',methods=['POST'])  
+def add():
+    if request.method == "POST":
+        customer = request.form["customer"]
+        country = request.form["country"]
+        region = request.form["region"]
+        sp = request.form["sp"]
+        sh = request.form["sh"]        
+
+    conn = sqlite3.connect('clients.db')
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+
+    cur.execute("""INSERT or IGNORE INTO clients 
+    (customer,country,region,sp,sh) VALUES (?,?,?,?,?)""",
+    (customer,country,region,sp,sh))
+
+    conn.commit()
+
+    cur.execute("SELECT id FROM clients WHERE customer LIKE ?",(customer,))
+    id = cur.fetchone()
+ 
+    conn.close()
+
+    return f"El cliente {customer} ha sido creado con ID # {id['id']}"
 
 app.run()
