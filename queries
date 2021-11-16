@@ -7,3 +7,8 @@ http://127.0.0.1:5000//api/v1/resources/clients/consult?customer=COLOMBINA
 
 Delete:
 http://127.0.0.1:5000//api/v1/resources/clients/delete?id=18
+
+
+Create:
+http://127.0.0.1:5000//api/v1/resources/clients/create
+http://127.0.0.1:5000//api/v1/resources/clients/delete?id=73
