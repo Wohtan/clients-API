@@ -1,7 +1,8 @@
 from os import spawnl
 import flask
-from flask import request, jsonify, render_template, redirect, url_for
+from flask import request, jsonify, render_template, redirect, url_for, flash
 import sqlite3
+import time
 
 app = flask.Flask(__name__)
 
@@ -26,6 +27,7 @@ def get_parameters():
     parameters = [customer,country,region,sp,sh,sort]
     return parameters
    
+app.secret_key = "keypass"
 
 @app.route('/', methods=['GET'])
 def home():
@@ -40,14 +42,14 @@ def api_all():
     cur = conn.cursor()
     all_clients = cur.execute('SELECT * FROM clients;').fetchall()
 
-    return jsonify(all_clients)
+    return render_template("consult.html", results = all_clients )
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     return "<h1>404</h1><p>The resource could not be found.</p>", 404
 
-##Consult clients
+##Get method
 
 @app.route('/api/v1/resources/clients/consult', methods=['GET'])
 def api_filter():
@@ -89,9 +91,10 @@ def api_filter():
     cur = conn.cursor()
     results = cur.execute(query, to_filter).fetchall()
     conn.close()
-    return jsonify(results)
+    print(results)
+    return render_template("consult.html", results = results)
 
-##Delete clients:
+##Delete method:
 
 @app.route('/api/v1/resources/clients/delete', methods=['GET','DELETE'])
 def api_delete():
@@ -105,16 +108,22 @@ def api_delete():
 
     nombre = cur.execute(f"SELECT customer from clients where id = {id}").fetchall()[0]
     cur.execute(query)
-    mensaje = f"El cliente {nombre['customer']} ha sido eliminado de la base de datos"
+
+    
+    flash(f"El cliente {nombre['customer']} ha sido eliminado de la base de datos")
 
     conn.commit()
     conn.close()
 
-    return mensaje
+    return redirect(url_for('api_all'))
+
+ #Form render
 
 @app.route('/api/v1/resources/clients/create')
 def formulario():
     return render_template("create.html")
+
+#Post method
 
 @app.route('/api/v1/resources/clients/create/added',methods=['POST'])  
 def add():
@@ -141,5 +150,7 @@ def add():
     conn.close()
 
     return f"El cliente {customer} ha sido creado con ID # {id['id']}"
+
+
 
 app.run()
