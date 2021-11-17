@@ -1,0 +1,38 @@
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+ <p>{{ message }}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<table>
+    <thead>
+        <tr>
+            <td>ID</td>
+            <td>Customer</td>
+            <td>Country</td>
+            <td>Region</td>
+            <td>SP</td>
+            <td>SH</td>
+            <td>Actions</td>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for result in results %}
+        <tr>
+            <td> {{result['id']}} </td>
+            <td> {{result['customer']}} </td>
+            <td> {{result['country']}} </td>
+            <td> {{result['region']}} </td>
+            <td> {{result['sp']}} </td>
+            <td> {{result['sh']}} </td>
+            <td>
+                <a href = '/api/v1/resources/clients/edit?id={{result["id"]}}' >Edit </a>
+                <a href = '/api/v1/resources/clients/delete?id={{result["id"]}}' > Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
