@@ -1,0 +1,19 @@
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+ <p>{{ message }}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<form action="/api/v1/resources/clients/update?id={{results[0]}}" method = "POST">
+    <input type="text" name="customer" placeholder="Customer's name" required value="{{results[1]}}">
+    <input type="text" name="country" placeholder="Country" required maxlength="2" value="{{results[2]}}">
+    <input type="text" name="region" placeholder="Region" required maxlength="3" value="{{results[3]}}">
+    <input type="text" name="sp" placeholder="Sold to party" required value="{{results[4]}}">
+    <input type="text" name="sh" placeholder="Ship to party" required value="{{results[5]}}">
+    <button type="submit">
+        Save
+    </button>
+
+</form>

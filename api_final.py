@@ -2,7 +2,6 @@ from os import spawnl
 import flask
 from flask import request, jsonify, render_template, redirect, url_for, flash
 import sqlite3
-import time
 
 app = flask.Flask(__name__)
 
@@ -151,6 +150,53 @@ def add():
 
     return f"El cliente {customer} ha sido creado con ID # {id['id']}"
 
+##Edit form:
 
+@app.route('/api/v1/resources/clients/edit', methods=['GET'])
+def edit():
+    query_parameters = request.args
+    id = query_parameters.get("id")
+    query = f"SELECT * from clients where id = {id}"
+
+    conn = sqlite3.connect('clients.db')
+    cur = conn.cursor()
+
+    results = cur.execute(query).fetchall()[0]
+ 
+    print(results)
+
+    return render_template ("edit.html", results = results)
+
+##Método PUT:
+
+@app.route('/api/v1/resources/clients/update', methods = ['GET','POST'])
+def update():
+    query_parameters = request.args
+    id = query_parameters.get("id")
+
+    if request.method == "POST":
+        customer = request.form["customer"]
+        country = request.form["country"]
+        region = request.form["region"]
+        sp = request.form["sp"]
+        sh = request.form["sh"]  
+
+    query = f"""UPDATE clients
+    SET customer = ?, country = ?,
+    region = ?, sp = ?, sh = ? WHERE id = {id}"""  
+
+    print(query,customer,country, region)
+
+    conn = sqlite3.connect("clients.db")
+    cur = conn.cursor()
+
+    cur.execute(query,(customer,country,region,sp,sh))
+    conn.commit()
+
+    flash(f"El cliente {customer} ha sido editado correctamente")
+
+    conn.close()
+    
+    return redirect(url_for('api_all'))
 
 app.run()
