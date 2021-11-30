@@ -1,11 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+
 <form action="/api/v1/resources/clients/create/added" method = "POST">
     <input type="text" name="customer" placeholder="Customer's name" required>
     <input type="text" name="country" placeholder="Country" required maxlength="2">
     <input type="text" name="region" placeholder="Region" required maxlength="3">
-    <input type="text" name="sp" placeholder="Sold to party" required>
-    <input type="text" name="sh" placeholder="Ship to party" required>
+    <input type="number" name="sp" placeholder="Sold to party" required>
+    <input type="number" name="sh" placeholder="Ship to party" required>
     <button type="submit">
         Save
     </button>
 
 </form>
+
+{% endblock %}
