@@ -1,6 +1,5 @@
-from os import spawnl
 import flask
-from flask import request, jsonify, render_template, redirect, url_for, flash
+from flask import request, render_template, redirect, url_for, flash
 import sqlite3
 
 app = flask.Flask(__name__)
@@ -80,18 +79,17 @@ def api_filter():
     
     if query.endswith("AND"):
         query = query[:-4] 
-
-## Verificadores
-    # print(query)
-    # print(to_filter)
-    
+   
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
     cur = conn.cursor()
     results = cur.execute(query, to_filter).fetchall()
     conn.close()
-    print(results)
-    return render_template("consult.html", results = results)
+    if results:
+        return render_template("consult.html", results = results)
+    else:
+        flash("No matches were found")
+        return redirect(url_for("api_all"))
 
 ##Delete method:
 
@@ -105,11 +103,11 @@ def api_delete():
     conn.row_factory = dict_factory
     cur = conn.cursor()
 
-    nombre = cur.execute(f"SELECT customer from clients where id = {id}").fetchall()[0]
+    name = cur.execute(f"SELECT customer from clients where id = {id}").fetchall()[0]
     cur.execute(query)
 
     
-    flash(f"El cliente {nombre['customer']} ha sido eliminado de la base de datos")
+    flash(f"The customer {name['customer']} has been deleted")
 
     conn.commit()
     conn.close()
@@ -148,7 +146,9 @@ def add():
  
     conn.close()
 
-    return f"El cliente {customer} ha sido creado con ID # {id['id']}"
+    flash(f"The client {customer} has been created with ID # {id['id']}")
+
+    return redirect(url_for("api_all"))
 
 ##Edit form:
 
@@ -167,7 +167,7 @@ def edit():
 
     return render_template ("edit.html", results = results)
 
-##Método PUT:
+##Update:
 
 @app.route('/api/v1/resources/clients/update', methods = ['GET','POST'])
 def update():
@@ -185,15 +185,13 @@ def update():
     SET customer = ?, country = ?,
     region = ?, sp = ?, sh = ? WHERE id = {id}"""  
 
-    print(query,customer,country, region)
-
     conn = sqlite3.connect("clients.db")
     cur = conn.cursor()
 
     cur.execute(query,(customer,country,region,sp,sh))
     conn.commit()
 
-    flash(f"El cliente {customer} ha sido editado correctamente")
+    flash(f"The client {customer} has been sucesfully updated")
 
     conn.close()
     

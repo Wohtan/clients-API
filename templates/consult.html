@@ -1,3 +1,8 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 {% for message in messages %}
@@ -5,6 +10,10 @@
 {% endfor %}
 {% endif %}
 {% endwith %}
+
+<form action="/api/v1/resources/clients/create">
+    <button>Create</button>
+</form>
 
 <table>
     <thead>
@@ -36,3 +45,5 @@
         {% endfor %}
     </tbody>
 </table>
+
+{% endblock %}
