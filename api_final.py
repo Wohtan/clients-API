@@ -15,7 +15,6 @@ def dict_factory(cursor, row):
 
 def get_parameters():
     query_parameters = request.args
-    # print(request.args)
     customer = query_parameters.get('customer')
     country = query_parameters.get('country')
     region = query_parameters.get('region')
@@ -30,7 +29,10 @@ app.secret_key = "keypass"
 @app.route('/', methods=['GET'])
 def home():
     return '''<h1>Client Information</h1>
-<p>This API returns basic information about clients</p>'''
+<h2>This API returns basic information about clients</h2>
+<p>Here comes the Swagger main info</p>
+<p>Page under construction</p>
+'''
 
 
 @app.route('/api/v1/resources/clients/all', methods=['GET'])

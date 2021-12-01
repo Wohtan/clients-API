@@ -11,16 +11,37 @@
 {% endif %}
 {% endwith %}
 
-<form action="/api/v1/resources/clients/update?id={{results[0]}}" method = "POST">
-    <input type="text" name="customer" placeholder="Customer's name" required value="{{results[1]}}">
-    <input type="text" name="country" placeholder="Country" required maxlength="2" value="{{results[2]}}">
-    <input type="text" name="region" placeholder="Region" required maxlength="3" value="{{results[3]}}">
-    <input type="text" name="sp" placeholder="Sold to party" required value="{{results[4]}}">
-    <input type="text" name="sh" placeholder="Ship to party" required value="{{results[5]}}">
-    <button type="submit">
-        Save
-    </button>
+<div class="container pt-3">
+    <h3>Edit a customer</h3>
+    <form action="/api/v1/resources/clients/update?id={{results[0]}}" method = "POST">
+    <div class="card card-body" style="width: 18rem;">
+        <div class="form-group">
+        <input type="text" name="customer" placeholder="Customer's name" required value="{{results[1]}}">
+        </div> 
 
-</form>
+        <div class="form-group">
+        <input type="text" name="country" placeholder="Country" required maxlength="2" value="{{results[2]}}">
+        </div> 
+
+        <div class="form-group">
+        <input type="text" name="region" placeholder="Region" required maxlength="3" value="{{results[3]}}">
+        </div> 
+
+        <div class="form-group">
+        <input type="text" name="sp" placeholder="Sold to party" required value="{{results[4]}}">
+        </div>
+
+        <div class="form-group">
+        <input type="text" name="sh" placeholder="Ship to party" required value="{{results[5]}}">
+        </div>
+
+        <div class="form-group pt-2 mx-auto">     
+        <button type="submit" class="btn btn-success">Save </button>  
+        <a href="/api/v1/resources/clients/all" class="btn btn-danger btn-block" > Go Back</a>     
+        </div>
+    </div>
+    </form>
+</div>
+
 
 {% endblock %}
