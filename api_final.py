@@ -119,7 +119,7 @@ def api_delete():
  #Form render
 
 @app.route('/api/v1/resources/clients/create')
-def formulario():
+def render_form():
     return render_template("create.html")
 
 #Post method
