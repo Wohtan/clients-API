@@ -31,13 +31,13 @@
                 <tbody>
                     {% for result in results %}
                     <tr>
-                        <td class="text-center"> {{result['id']}} </td>
+                        <td> {{result['id']}} </td>
                         <td> {{result['customer']}} </td>
-                        <td class="text-center"> {{result['country']}} </td>
-                        <td class="text-center"> {{result['region']}} </td>
-                        <td class="text-center"> {{result['sp']}} </td>
-                        <td class="text-center"> {{result['sh']}} </td>
-                        <td class="text-center">
+                        <td> {{result['country']}} </td>
+                        <td> {{result['region']}} </td>
+                        <td> {{result['sp']}} </td>
+                        <td> {{result['sh']}} </td>
+                        <td>
                             <a href = '/api/v1/resources/clients/edit?id={{result["id"]}}' class="btn btn-primary" >Edit </a>
                             <a href = '/api/v1/resources/clients/delete?id={{result["id"]}}' class="btn btn-danger" > Delete</a>
                         </td>
