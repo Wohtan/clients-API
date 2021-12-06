@@ -8,10 +8,10 @@ if __name__ == "__main__":
     app.config["DEBUG"] = True
 
 def dict_factory(cursor, row):
-    d = {}
+    dictionary = {}
     for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+        dictionary[col[0]] = row[idx]
+    return dictionary
 
 def get_parameters():
     query_parameters = request.args
