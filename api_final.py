@@ -1,6 +1,7 @@
 import flask
 from flask import request, render_template, redirect, url_for, flash
 import sqlite3
+from math import ceil
 
 app = flask.Flask(__name__)
 
@@ -39,10 +40,18 @@ def home():
 def api_all():
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
-    cur = conn.cursor()
-    all_clients = cur.execute('SELECT * FROM clients;').fetchall()
+    cur = conn.cursor() 
 
-    return render_template("consult.html", results = all_clients )
+    ##Results per page and offset:
+    per_page = 10
+    offset = 0
+    rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
+    rows_number = rows_number[0]["COUNT(*)"]
+    pages_number = ceil(rows_number / per_page)
+
+    all_clients = cur.execute(f'SELECT * FROM clients LIMIT {per_page} OFFSET {offset};').fetchall()
+
+    return render_template("consult.html", results = all_clients, pages_number = pages_number )
 
 
 @app.errorhandler(404)
@@ -56,6 +65,10 @@ def api_filter():
     query = "SELECT * FROM clients WHERE"
     to_filter = []
     customer,country,region,sp,sh,sort = get_parameters()
+
+    ##Results per page:
+    per_page = 10
+    offset = 10 
 
     if customer:
         query += f' customer LIKE? AND'
@@ -80,7 +93,9 @@ def api_filter():
         return page_not_found(404)
     
     if query.endswith("AND"):
-        query = query[:-4] 
+        query = query[:-4]
+
+    query = query + f" LIMIT {per_page} OFFSET {offset}" 
    
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
