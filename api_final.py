@@ -1,3 +1,4 @@
+import enum
 import flask
 from flask import request, render_template, redirect, url_for, flash
 import sqlite3
@@ -46,18 +47,21 @@ def api_all():
     ##Results per page and offset:
     per_page = 10
     query_parameters = request.args
-    offset = int(query_parameters.get('page')) * per_page
+
+    if query_parameters:
+        page = int(query_parameters.get('page')) - 1 ##This -1 sets the first page offset to zero
+
+        offset = page * per_page
+
+    else:
+        offset = 0
 
     rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
     rows_number = rows_number[0]["COUNT(*)"]
     pages_number = ceil(rows_number / per_page)
-
-    if not offset:
-        offset = 0
+    pages_number = range(1, pages_number)
 
     all_clients = cur.execute(f'SELECT * FROM clients LIMIT {per_page} OFFSET {offset};').fetchall()
-
-    print(offset)
 
     return render_template("consult.html", results = all_clients, pages_number = pages_number )
 
