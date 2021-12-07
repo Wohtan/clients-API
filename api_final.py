@@ -14,7 +14,7 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
-def get_parameters():
+def get_query_parameters():
     query_parameters = request.args
     customer = query_parameters.get('customer')
     country = query_parameters.get('country')
@@ -40,16 +40,24 @@ def home():
 def api_all():
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
+
     cur = conn.cursor() 
 
     ##Results per page and offset:
     per_page = 10
-    offset = 0
+    query_parameters = request.args
+    offset = int(query_parameters.get('page')) * per_page
+
     rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
     rows_number = rows_number[0]["COUNT(*)"]
     pages_number = ceil(rows_number / per_page)
 
+    if not offset:
+        offset = 0
+
     all_clients = cur.execute(f'SELECT * FROM clients LIMIT {per_page} OFFSET {offset};').fetchall()
+
+    print(offset)
 
     return render_template("consult.html", results = all_clients, pages_number = pages_number )
 
@@ -64,7 +72,7 @@ def page_not_found(e):
 def api_filter():
     query = "SELECT * FROM clients WHERE"
     to_filter = []
-    customer,country,region,sp,sh,sort = get_parameters()
+    customer,country,region,sp,sh,sort = get_query_parameters()
 
     ##Results per page:
     per_page = 10
