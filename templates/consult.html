@@ -23,11 +23,9 @@
         <a class="page-link" href="#" tabindex="-1">Previous</a>
       </li>
 
-      {% for page in range(pages_number) %}
+      {% for page in pages_number %}
 
-      <li class="page-item "><a class="page-link" href="/api/v1/resources/clients/all?page={{ page }}">{{ page + 1 }}</a></li>
-
-      <!-- page+1 only changes the starting number from 0 to 1-->
+      <li class="page-item "><a class="page-link" href="/api/v1/resources/clients/all?page={{ page }}">{{ page }}</a></li>
       
       {% endfor %}
 
