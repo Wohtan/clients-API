@@ -77,7 +77,8 @@ def api_filter():
         query = query[:-4] + f' ORDER BY {sort}'
         
     if not (customer or country or region or sp or sh):
-        return page_not_found(404)
+        flash("No search criteria was given") 
+        return redirect(url_for("api_all"))    
     
     if query.endswith("AND"):
         query = query[:-4] 
