@@ -1,31 +1,30 @@
 import csv
 import sqlite3 as sql
 
-def leercsv():
-    #Verifica si existe el archivo
+def readcsv():
+    #Checks if the file already exists
     try:
         clients = []
 
-        #Abrir el CSV y añadir los elementos a la lista
+        #Open the file and append the names to the list
         with open("clients.csv") as file:
             reader = csv.reader(file, delimiter = ";")
-            #Se salta el encabezado
+            #Skips the header
             next(file)
             for i in reader:
                 clients.append(tuple(i))
-        print("Fichero leído correctamente")
+        print("File sucessfully read")
 
         return clients
 
     except:
-        print("Fichero inexistente")
+        print("Unexisting file")
 
-def creardb():
-    #Crea conexión a la db y crea el cursor 
-    conexion = sql.connect("clients.db")
-    cursor = conexion.cursor()
+def createdb():
+    conn = sql.connect("clients.db")
+    cursor = conn.cursor()
 
-    #Si ya está creada la db retornará error
+    #If the table already exists, it will show an error message
     try:
         cursor.execute("""
         CREATE TABLE clients (
@@ -37,13 +36,13 @@ def creardb():
             sh INTEGER
         )  
         """)
-        print("Tabla creada correctamente")
+        print("Table sucesfully created")
     
     except:
-        print("Base de datos ya creada")
+        print("Existing table, no changes were made")
 
-    cursor.executemany("INSERT INTO clients VALUES (null,?,?,?,?,?)", leercsv())
-    conexion.commit()
-    conexion.close()
+    cursor.executemany("INSERT INTO clients VALUES (null,?,?,?,?,?)", readcsv())
+    conn.commit()
+    conn.close()
 
-creardb()
+createdb()
