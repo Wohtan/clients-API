@@ -14,29 +14,35 @@
 {% endif %}
 {% endwith %}
 
-<!--- Navigation --> 
+<!-- Pagination -->
 
 <div class="container pt-3">
     <nav aria-label="...">
     <ul class="pagination">
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1">Previous</a>
+
+      <li class="page-item" id="Previous" >
+        <a class="page-link" href="/api/v1/resources/clients/all?page={{ actual_page }}">Previous</a>
       </li>
 
-      {% for page in pages_number %}
+      {% for page in range(1,pages_number+1) %}   
+      <!-- +1 because range() will take out the last value -->
 
-      <li class="page-item "><a class="page-link" href="/api/v1/resources/clients/all?page={{ page }}">{{ page }}</a></li>
+      <li class="page-item" id="Page {{ page }}">
+        <a class="page-link" href="/api/v1/resources/clients/all?page={{ page }}">{{ page }}</a>
+      </li>
       
       {% endfor %}
+      
 
-        <a class="page-link" href="#">Next</a>
+      <li class="page-item" id='Next' >
+        <a class="page-link" href="/api/v1/resources/clients/all?page={{ actual_page+2 }}">Next</a>
       </li>
+
     </ul>
-  </nav>
+    </nav>
 </div>
 
-<!--- end of navigation-->
-
+<!--- end of pagination-->
 
 <div class="row">
         <div class="card card-body">
@@ -73,5 +79,28 @@
     </div>
 </div>
 
+<!-- Rows per page -->
+  <div class="dropdown show pt-3">
+    <a class="btn btn-secondary dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Results per page
+    </a>
+  
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+      <a class="dropdown-item" href="#">10</a>
+      <a class="dropdown-item" href="#">20</a>
+      <a class="dropdown-item" href="#">30</a>
+    </div>
+  </div>
+<!-- End of rows per page -->
+
+<!-- Scripts-->
+
+<script src="{{url_for('static', filename='js/main.js')}}"></script>
+
+<script>  var actual_page = {{ actual_page }}; </script>
+<script>  var pages_number = {{ pages_number }}; </script>
+
+<!-- end of scripts -->
 
 {% endblock %}
+

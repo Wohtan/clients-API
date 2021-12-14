@@ -45,25 +45,29 @@ def api_all():
     cur = conn.cursor() 
 
     ##Results per page and offset:
-    per_page = 10
+    results_per_page = 10
     query_parameters = request.args
+    actual_page = 0
 
     if query_parameters:
-        page = int(query_parameters.get('page')) - 1 ##This -1 sets the first page offset to zero
+        actual_page = int(query_parameters.get('page')) - 1 ##This '-1' sets the first page offset to zero
 
-        offset = page * per_page
+        offset = actual_page * results_per_page
 
     else:
         offset = 0
 
     rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
-    rows_number = rows_number[0]["COUNT(*)"]
-    pages_number = ceil(rows_number / per_page)
-    pages_number = range(1, pages_number)
+    rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in db
+    pages_number = ceil(rows_number / results_per_page) 
+    pages_number = pages_number 
 
-    all_clients = cur.execute(f'SELECT * FROM clients LIMIT {per_page} OFFSET {offset};').fetchall()
+    all_clients = cur.execute(f'SELECT * FROM clients LIMIT {results_per_page} OFFSET {offset};').fetchall()
 
-    return render_template("consult.html", results = all_clients, pages_number = pages_number )
+    return render_template("consult.html", 
+    results = all_clients, 
+    pages_number = pages_number,
+    actual_page = actual_page)
 
 
 @app.errorhandler(404)
