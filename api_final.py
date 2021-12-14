@@ -45,16 +45,21 @@ def api_all():
     cur = conn.cursor() 
 
     ##Results per page and offset:
-    results_per_page = 10
     query_parameters = request.args
-    actual_page = 0
 
-    if query_parameters:
+    try:    
+        results_per_page = int(query_parameters.get('rpp'))
+    except:
+        results_per_page = 10
+
+    try:
         actual_page = int(query_parameters.get('page')) - 1 ##This '-1' sets the first page offset to zero
+    except:
+        actual_page = 0
 
+    try:
         offset = actual_page * results_per_page
-
-    else:
+    except:
         offset = 0
 
     rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
