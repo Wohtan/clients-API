@@ -10,10 +10,10 @@ if __name__ == "__main__":
     app.config["DEBUG"] = True
 
 def dict_factory(cursor, row):
-    d = {}
+    dictionary = {}
     for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+        dictionary[col[0]] = row[idx]
+    return dictionary
 
 def get_query_parameters():
     query_parameters = request.args
@@ -119,7 +119,8 @@ def api_filter():
         query = query[:-4] + f' ORDER BY {sort}'
         
     if not (customer or country or region or sp or sh):
-        return page_not_found(404)
+        flash("No search criteria was given") 
+        return redirect(url_for("api_all"))    
     
     if query.endswith("AND"):
         query = query[:-4]
