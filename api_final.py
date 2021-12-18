@@ -1,6 +1,6 @@
 import enum
 import flask
-from flask import request, render_template, redirect, url_for, flash
+from flask import request, render_template, redirect, url_for, flash, session
 import sqlite3
 from math import ceil
 
@@ -47,17 +47,26 @@ def api_all():
     ##Results per page and offset:
     query_parameters = request.args
 
-    default_results_per_page = 10
+    results_per_page_query = query_parameters.get('rpp')
+    actual_page = query_parameters.get('page') 
 
-    try:    
-        actual_results_per_page = int(query_parameters.get('rpp'))
-    except:
-        actual_results_per_page = default_results_per_page
+    # Session code to read the stored value
+    if 'results_per_page' in session:
+        if results_per_page_query: #If exists the query from the browser, assigns it to the session dict
+            session['results_per_page'] = int(results_per_page_query)
+    else:
+        session['results_per_page'] = 10
 
-    try:
-        actual_page = int(query_parameters.get('page')) - 1 ##This '-1' sets the first page offset to zero
-    except:
+    actual_results_per_page = session['results_per_page'] 
+
+    # Assign the actual page value
+
+    if actual_page:
+        actual_page = int(actual_page) - 1 ##This '-1' sets the first page offset to zero
+    else:
         actual_page = 0
+    
+    ##SQL Query
 
     offset = actual_page * actual_results_per_page
 
