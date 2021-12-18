@@ -47,27 +47,26 @@ def api_all():
     ##Results per page and offset:
     query_parameters = request.args
 
+    default_results_per_page = 10
+
     try:    
-        results_per_page = int(query_parameters.get('rpp'))
+        actual_results_per_page = int(query_parameters.get('rpp'))
     except:
-        results_per_page = 10
+        actual_results_per_page = default_results_per_page
 
     try:
         actual_page = int(query_parameters.get('page')) - 1 ##This '-1' sets the first page offset to zero
     except:
         actual_page = 0
 
-    try:
-        offset = actual_page * results_per_page
-    except:
-        offset = 0
+    offset = actual_page * actual_results_per_page
 
     rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
     rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in db
-    pages_number = ceil(rows_number / results_per_page) 
+    pages_number = ceil(rows_number / actual_results_per_page) 
     pages_number = pages_number 
 
-    all_clients = cur.execute(f'SELECT * FROM clients LIMIT {results_per_page} OFFSET {offset};').fetchall()
+    all_clients = cur.execute(f'SELECT * FROM clients LIMIT {actual_results_per_page} OFFSET {offset};').fetchall()
 
     return render_template("consult.html", 
     results = all_clients, 
