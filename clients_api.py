@@ -89,11 +89,20 @@ def page_not_found(e):
 
 ##Get method
 
-@app.route('/api/v1/resources/clients/consult', methods=['GET'])
+@app.route('/api/v1/resources/clients/consult', methods=['GET','POST'])
 def api_filter():
+
+    if request.method == 'POST':
+        customer = request.form["customer"]
+        country = request.form["country"]
+        region = request.form["region"]
+        sp = request.form["sp"]
+        sh = request.form["sh"]  
+
     query = "SELECT * FROM clients WHERE"
     to_filter = []
-    customer,country,region,sp,sh,sort = get_query_parameters()
+
+    print(customer)
 
     ##Results per page:
     per_page = 10
@@ -115,8 +124,8 @@ def api_filter():
     if sh:
         query += ' sh=? AND'
         to_filter.append(sh)
-    if sort:
-        query = query[:-4] + f' ORDER BY {sort}'
+    # if sort:
+    #     query = query[:-4] + f' ORDER BY {sort}'
         
     if not (customer or country or region or sp or sh):
         flash("No search criteria was given") 
