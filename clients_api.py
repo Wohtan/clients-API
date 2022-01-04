@@ -36,16 +36,16 @@ def home():
 def page_not_found(e):
     return "<h1>404</h1><p>The resource could not be found.</p>", 404
 
-@app.route('/api/v1/resources/clients/all', methods=['GET'])
+@app.route('/api/v1/resources/clients/all', methods=['GET','POST'])
 def api_all():
+
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
-
     cur = conn.cursor() 
 
-    ##Results per page and offset:
+#<<<<<<<Pagination function>>>>>>
+    ##Results from the template
     query_parameters = request.args
-
     results_per_page_query = query_parameters.get('rpp')
     actual_page = query_parameters.get('page') 
 
@@ -64,80 +64,79 @@ def api_all():
         actual_page = int(actual_page) - 1 ##This '-1' sets the first page offset to zero
     else:
         actual_page = 0
-    
-    ##SQL Query
 
     offset = actual_page * actual_results_per_page
 
-    rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
-    rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in db
-    pages_number = ceil(rows_number / actual_results_per_page) 
+#<<<<<<<Filter function>>>>>>
 
-    all_clients = cur.execute(f'SELECT * FROM clients LIMIT {actual_results_per_page} OFFSET {offset};').fetchall()
-
-    return render_template("consult.html", 
-    results = all_clients, 
-    pages_number = pages_number,
-    actual_page = actual_page)
-
-##Filter function
-
-@app.route('/api/v1/resources/clients/consult', methods=['GET','POST'])
-def api_filter():
-
+    ##Checks if there is a filter request from the form
+     
     if request.method == 'POST':
+        to_filter = []
+        query = "SELECT * FROM clients WHERE"
         customer = request.form["customer"]
         country = request.form["country"]
         region = request.form["region"]
         sp = request.form["sp"]
-        sh = request.form["sh"]  
+        sh = request.form["sh"] 
 
-    query = "SELECT * FROM clients WHERE"
-    to_filter = []
+        if customer:
+            query += f' customer LIKE? AND'
+            customer = '%' + customer + '%'
+            to_filter.append(customer)
+        if country:
+            query += ' country=? AND'
+            to_filter.append(country)
+        if region:
+            query += ' region=? AND'
+            to_filter.append(region)
+        if sp:
+            query += ' sp=? AND'
+            to_filter.append(sp)
+        if sh:
+            query += ' sh=? AND'
+            to_filter.append(sh)
+        # TODO: Add the sort function
+        # if sort:
+        #     query = query[:-4] + f' ORDER BY {sort}'
+        if query.endswith("AND"):
+            query = query[:-4]
 
-    ##Results per page:
-    per_page = 10
-    offset = 10 
+        ##Error handler #1:
+        if not (customer or country or region or sp or sh):
+            flash("No search criteria was given") 
+            return redirect(url_for("api_all"))  
 
-    if customer:
-        query += f' customer LIKE? AND'
-        customer = '%' + customer + '%'
-        to_filter.append(customer)
-    if country:
-        query += ' country=? AND'
-        to_filter.append(country)
-    if region:
-        query += ' region=? AND'
-        to_filter.append(region)
-    if sp:
-        query += ' sp=? AND'
-        to_filter.append(sp)
-    if sh:
-        query += ' sh=? AND'
-        to_filter.append(sh)
-    # if sort:
-    #     query = query[:-4] + f' ORDER BY {sort}'
-        
-    if not (customer or country or region or sp or sh):
-        flash("No search criteria was given") 
-        return redirect(url_for("api_all"))    
-    
-    if query.endswith("AND"):
-        query = query[:-4]
+        query = query + f" LIMIT {actual_results_per_page} OFFSET {offset};"
 
-    query = query 
-    # + f" LIMIT {per_page} OFFSET {offset}" 
-       
-    conn = sqlite3.connect('clients.db')
-    conn.row_factory = dict_factory
-    cur = conn.cursor()
-    results = cur.execute(query, to_filter).fetchall()
-    conn.close()
-    if results:
-        return render_template("consult.html", results = results)
+        filtered_results = cur.execute(query, to_filter)
+
+        if filtered_results:
+            results = filtered_results
+            rows_number = cur.execute("SELECT COUNT(*)" + query[8:],to_filter).fetchall()
+            rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in the filtered consult
+         
+        else:
+            flash("No matches were found")
+            return redirect(url_for("api_all"))
+
+##If not filter request was made:
     else:
-        flash("No matches were found")
-        return redirect(url_for("api_all"))
+        results = cur.execute(f'SELECT * FROM clients LIMIT {actual_results_per_page} OFFSET {offset};').fetchall()
+        rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
+        rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in db
+    
+    pages_number = ceil(rows_number / actual_results_per_page)   
+
+    print(list(results)) 
+    
+    return render_template("consult.html", 
+    results = results, 
+    pages_number = pages_number,
+    actual_page = actual_page)
+
+    conn.close()
+
 
 ##Delete method:
 
@@ -198,7 +197,7 @@ def add():
 
     return redirect(url_for("api_all"))
 
-##Edit form:
+##Edit form: //This route allows to bring the Client data as a placeholder in the form
 
 @app.route('/api/v1/resources/clients/edit', methods=['GET'])
 def edit():
@@ -211,11 +210,9 @@ def edit():
 
     results = cur.execute(query).fetchall()[0]
  
-    print(results)
-
     return render_template ("edit.html", results = results)
 
-##Update:
+##Update action:
 
 @app.route('/api/v1/resources/clients/update', methods = ['GET','POST'])
 def update():
