@@ -30,12 +30,11 @@ app.secret_key = "keypass"
 
 @app.route('/', methods=['GET'])
 def home():
-    return '''<h1>Client Information</h1>
-<h2>This API returns basic information about clients</h2>
-<p>Here comes the Swagger main info</p>
-<p>Page under construction</p>
-'''
+    return redirect(url_for("api_all"))
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return "<h1>404</h1><p>The resource could not be found.</p>", 404
 
 @app.route('/api/v1/resources/clients/all', methods=['GET'])
 def api_all():
@@ -73,7 +72,6 @@ def api_all():
     rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
     rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in db
     pages_number = ceil(rows_number / actual_results_per_page) 
-    pages_number = pages_number 
 
     all_clients = cur.execute(f'SELECT * FROM clients LIMIT {actual_results_per_page} OFFSET {offset};').fetchall()
 
@@ -82,12 +80,7 @@ def api_all():
     pages_number = pages_number,
     actual_page = actual_page)
 
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return "<h1>404</h1><p>The resource could not be found.</p>", 404
-
-##Get method
+##Filter function
 
 @app.route('/api/v1/resources/clients/consult', methods=['GET','POST'])
 def api_filter():
@@ -101,8 +94,6 @@ def api_filter():
 
     query = "SELECT * FROM clients WHERE"
     to_filter = []
-
-    print(customer)
 
     ##Results per page:
     per_page = 10
@@ -134,8 +125,9 @@ def api_filter():
     if query.endswith("AND"):
         query = query[:-4]
 
-    query = query + f" LIMIT {per_page} OFFSET {offset}" 
-   
+    query = query 
+    # + f" LIMIT {per_page} OFFSET {offset}" 
+       
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
     cur = conn.cursor()
