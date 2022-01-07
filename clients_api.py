@@ -3,6 +3,7 @@ import flask
 from flask import request, render_template, redirect, url_for, flash, session
 import sqlite3
 from math import ceil
+from functions import *
 
 app = flask.Flask(__name__)
 
@@ -38,78 +39,33 @@ def page_not_found(e):
 
 @app.route('/api/v1/resources/clients/all', methods=['GET','POST'])
 def api_all():
-
+    
+    # Connection to DB
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
     cur = conn.cursor() 
+    
+    # Pagination:
+    actual_results_per_page, offset, actual_page = pagination(request,session)
 
-#<<<<<<<Pagination function>>>>>>
-    ##Results from the template
-    query_parameters = request.args
-    results_per_page_query = query_parameters.get('rpp')
-    actual_page = query_parameters.get('page') 
-
-    # Session code to read the stored value
-    if 'results_per_page' in session:
-        if results_per_page_query: #If exists the query from the browser, assigns it to the session dict
-            session['results_per_page'] = int(results_per_page_query)
-    else:
-        session['results_per_page'] = 10
-
-    actual_results_per_page = session['results_per_page'] 
-
-    # Assign the actual page value
-
-    if actual_page:
-        actual_page = int(actual_page) - 1 ##This '-1' sets the first page offset to zero
-    else:
-        actual_page = 0
-
-    offset = actual_page * actual_results_per_page
-
-#<<<<<<<Filter function>>>>>>
-
-    ##Checks if there is a filter request from the form
+    ## Checks if there is a filter request from the form
      
     if request.method == 'POST':
-        to_filter = []
-        query = "SELECT * FROM clients WHERE"
         customer = request.form["customer"]
         country = request.form["country"]
         region = request.form["region"]
         sp = request.form["sp"]
         sh = request.form["sh"] 
+        filter_parameters = [customer,country,region,sp,sh]
 
-        if customer:
-            query += f' customer LIKE? AND'
-            customer = '%' + customer + '%'
-            to_filter.append(customer)
-        if country:
-            query += ' country=? AND'
-            to_filter.append(country)
-        if region:
-            query += ' region=? AND'
-            to_filter.append(region)
-        if sp:
-            query += ' sp=? AND'
-            to_filter.append(sp)
-        if sh:
-            query += ' sh=? AND'
-            to_filter.append(sh)
-        # TODO: Add the sort function
-        # if sort:
-        #     query = query[:-4] + f' ORDER BY {sort}'
-        if query.endswith("AND"):
-            query = query[:-4]
+        query,to_filter = create_sql_query(filter_parameters,actual_results_per_page,offset)
 
         ##Error handler #1:
         if not (customer or country or region or sp or sh):
             flash("No search criteria was given") 
             return redirect(url_for("api_all"))  
 
-        query = query + f" LIMIT {actual_results_per_page} OFFSET {offset};"
-
-        filtered_results = cur.execute(query, to_filter)
+        filtered_results = cur.execute(query, to_filter).fetchall()
 
         if filtered_results:
             results = filtered_results
