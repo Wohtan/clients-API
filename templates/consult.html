@@ -8,8 +8,7 @@
 
 <div class="alert alert-success alert-dismissible fade show" role="alert">
     <strong>{{ message }}</strong>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
+    <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close">
   </button>
 </div>
 {% endfor %}
@@ -53,25 +52,29 @@
     <div class="row m-2">
 
         <div class="col">
-            <input type="text" class="form-control" name="customer" placeholder="Customer">
+            <input type="text" class="form-control" name="customer" placeholder="Customer" value={{ filter_parameters[0] }}>
         </div>
         <div class="col">
-            <input type="text" class="form-control"  maxlength="2" name="country" placeholder="Country">
+            <input type="text" class="form-control"  maxlength="2" name="country" placeholder="Country" value={{ filter_parameters[1] }}>
         </div>
         <div class="col">
-            <input type="text" class="form-control"  maxlength="3" name="region" placeholder="Region">
+            <input type="text" class="form-control"  maxlength="3" name="region" placeholder="Region" value={{ filter_parameters[2] }}>
         </div>
         <div class="col">
-            <input type="number" class="form-control" name="sp" placeholder="SP">
+            <input type="number" class="form-control" name="sp" placeholder="SP" value={{ filter_parameters[3] }}>
         </div>
         <div class="col">
-            <input type="number" class="form-control"  name="sh" placeholder="SH">
+            <input type="number" class="form-control"  name="sh" placeholder="SH" value={{ filter_parameters[4] }}>
         </div>    
 
         <div class = "col">
             <button type="submit" class="btn btn-success">Search </button>  
         </div> 
-        
+
+        <div class = "col">
+        <a href = '/api/v1/resources/clients/clear' class="btn btn-danger" > Clear filters</a>
+        </div> 
+
     </div>
     </form>
 </div>

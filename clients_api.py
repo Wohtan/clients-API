@@ -3,6 +3,8 @@ import flask
 from flask import request, render_template, redirect, url_for, flash, session
 import sqlite3
 from math import ceil
+
+from flask.templating import render_template_string
 from functions import *
 
 app = flask.Flask(__name__)
@@ -45,6 +47,8 @@ def api_all():
     conn.row_factory = dict_factory
     cur = conn.cursor() 
 
+    filter_parameters = []
+
     # Pagination:
     actual_results_per_page, offset, actual_page = pagination(request,session)
 
@@ -80,32 +84,42 @@ def api_all():
         ##Error handler #1:
         if not (customer or country or region or sp or sh):
             flash("No search criteria was given") 
-            return redirect(url_for("api_all"))  
+            return redirect(url_for("clear"))  
 
-        filtered_results = cur.execute(query, to_filter).fetchall()
+        filtered_results = cur.execute(query + f"LIMIT {actual_results_per_page} OFFSET {offset};", to_filter).fetchall()
 
         if filtered_results:
             results = filtered_results
             rows_number = cur.execute("SELECT COUNT(*)" + query[8:],to_filter).fetchall()
             rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in the filtered consult
-         
+
+        ##Error handler #2:         
         else:
             flash("No matches were found")
-            return redirect(url_for("api_all"))
+            return redirect(url_for("clear"))
 
     
     pages_number = ceil(rows_number / actual_results_per_page)   
-
-    print(list(results)) 
     
     return render_template("consult.html", 
     results = results, 
     pages_number = pages_number,
-    actual_page = actual_page)
+    actual_page = actual_page,
+    filter_parameters = filter_parameters)
 
     conn.close()
 
 ##Delete method:
+
+@app.route('/api/v1/resources/clients/clear')
+def clear():
+    try:
+        session.pop("query")
+        session.pop("to_filter")
+    except:
+        flash("Non-active filter request")
+    finally:
+        return redirect(url_for("api_all"))
 
 @app.route('/api/v1/resources/clients/delete', methods=['GET','DELETE'])
 def api_delete():

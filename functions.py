@@ -10,16 +10,20 @@ def create_sql_query(filter_parameters,actual_results_per_page,offset):
         to_filter.append(customer)
 
     if country:
-        query += ' country=? AND'
+        query += ' country LIKE? AND'
+        country = '%' + country + '%'
         to_filter.append(country)
     if region:
-        query += ' region=? AND'
+        query += ' region LIKE? AND'
+        region = '%' + region + '%'
         to_filter.append(region)
     if sp:
-        query += ' sp=? AND'
+        query += ' sp LIKE? AND'
+        sp = '%' + sp + '%'
         to_filter.append(sp)
     if sh:
-        query += ' sh=? AND'
+        query += ' sh LIKE? AND'
+        sh = '%' + sh + '%'
         to_filter.append(sh)
     # TODO: Add the sort function
     # if sort:
