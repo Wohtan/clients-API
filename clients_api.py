@@ -1,4 +1,6 @@
 import enum
+from sys import setrecursionlimit
+from unittest.util import sorted_list_difference
 import flask
 from flask import request, render_template, redirect, url_for, flash, session
 import sqlite3
@@ -41,7 +43,8 @@ def page_not_found(e):
 
 @app.route('/api/v1/resources/clients/all', methods=['GET','POST'])
 def api_all():
-    
+
+   
     # Connection to DB
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
@@ -49,19 +52,29 @@ def api_all():
 
     filter_parameters = []
 
+    ## Sort request?
+    if "sort_by" in session:
+        sort_by = request.args.get("sort_by")
+        if sort_by:
+            session["sort_by"] = f" ORDER BY {sort_by}"  
+
+    else:
+        session["sort_by"] = ""
+
     # Pagination:
     actual_results_per_page, offset, actual_page = pagination(request,session)
 
     #Checks if there is an active query on session:
     if "query" in session:
-        filtered_results = cur.execute(session["query"] + f"LIMIT {actual_results_per_page} OFFSET {offset};", session["to_filter"]).fetchall()
+        filtered_results = cur.execute(session["query"] + session["sort_by"] + f" LIMIT {actual_results_per_page} OFFSET {offset} ;" , session["to_filter"]).fetchall()
+        
         results = filtered_results
         rows_number = cur.execute("SELECT COUNT(*)" + session["query"][8:],session["to_filter"]).fetchall()
         rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in the filtered consult
 
     ##If not filter request was made:
     else:
-        results = cur.execute(f'SELECT * FROM clients LIMIT {actual_results_per_page} OFFSET {offset};').fetchall()
+        results = cur.execute(f'SELECT * FROM clients' + session["sort_by"] + f" LIMIT {actual_results_per_page} OFFSET {offset};").fetchall()
         rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
         rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in db
 
@@ -79,7 +92,6 @@ def api_all():
         query,to_filter = create_sql_query(filter_parameters,actual_results_per_page,offset)
         session["query"] = query
         session["to_filter"] = to_filter
-
 
         ##Error handler #1:
         if not (customer or country or region or sp or sh):
@@ -109,18 +121,17 @@ def api_all():
 
     conn.close()
 
-##Delete method:
 
 @app.route('/api/v1/resources/clients/clear')
 def clear():
     try:
         session.pop("query")
         session.pop("to_filter")
-    except:
-        flash("Non-active filter request")
+        session["sort_by"] = ""
     finally:
         return redirect(url_for("api_all"))
 
+##Delete method:
 @app.route('/api/v1/resources/clients/delete', methods=['GET','DELETE'])
 def api_delete():
     query_parameters = request.args
