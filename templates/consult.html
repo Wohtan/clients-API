@@ -72,6 +72,22 @@
         </div> 
 
         <div class = "col">
+          <div class="dropdown show">
+            <a class="btn btn-secondary dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Sort by
+            </a>
+          
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+              <a class="dropdown-item" href="/api/v1/resources/clients/all?sort_by=customer">Customer</a>
+              <a class="dropdown-item" href="/api/v1/resources/clients/all?sort_by=country">Country</a>
+              <a class="dropdown-item" href="/api/v1/resources/clients/all?sort_by=region">Region</a>
+              <a class="dropdown-item" href="/api/v1/resources/clients/all?sort_by=sp">SP</a>
+              <a class="dropdown-item" href="/api/v1/resources/clients/all?sort_by=sh">SH</a>
+            </div>
+          </div>
+        </div>
+
+        <div class = "col">
         <a href = '/api/v1/resources/clients/clear' class="btn btn-danger" > Clear filters</a>
         </div> 
 

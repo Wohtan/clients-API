@@ -8,7 +8,6 @@ def create_sql_query(filter_parameters,actual_results_per_page,offset):
         query += f' customer LIKE? AND'
         customer = '%' + customer + '%'
         to_filter.append(customer)
-
     if country:
         query += ' country LIKE? AND'
         country = '%' + country + '%'
@@ -25,9 +24,7 @@ def create_sql_query(filter_parameters,actual_results_per_page,offset):
         query += ' sh LIKE? AND'
         sh = '%' + sh + '%'
         to_filter.append(sh)
-    # TODO: Add the sort function
-    # if sort:
-    #     query = query[:-4] + f' ORDER BY {sort}'
+
     if query.endswith("AND"):
         query = query[:-4]
 
