@@ -44,9 +44,22 @@ def api_all():
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
     cur = conn.cursor() 
-    
+
     # Pagination:
     actual_results_per_page, offset, actual_page = pagination(request,session)
+
+    #Checks if there is an active query on session:
+    if "query" in session:
+        filtered_results = cur.execute(session["query"] + f"LIMIT {actual_results_per_page} OFFSET {offset};", session["to_filter"]).fetchall()
+        results = filtered_results
+        rows_number = cur.execute("SELECT COUNT(*)" + session["query"][8:],session["to_filter"]).fetchall()
+        rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in the filtered consult
+
+    ##If not filter request was made:
+    else:
+        results = cur.execute(f'SELECT * FROM clients LIMIT {actual_results_per_page} OFFSET {offset};').fetchall()
+        rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
+        rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in db
 
     ## Checks if there is a filter request from the form
      
@@ -58,7 +71,11 @@ def api_all():
         sh = request.form["sh"] 
         filter_parameters = [customer,country,region,sp,sh]
 
+        # SQL query creation and storage in session
         query,to_filter = create_sql_query(filter_parameters,actual_results_per_page,offset)
+        session["query"] = query
+        session["to_filter"] = to_filter
+
 
         ##Error handler #1:
         if not (customer or country or region or sp or sh):
@@ -76,11 +93,6 @@ def api_all():
             flash("No matches were found")
             return redirect(url_for("api_all"))
 
-##If not filter request was made:
-    else:
-        results = cur.execute(f'SELECT * FROM clients LIMIT {actual_results_per_page} OFFSET {offset};').fetchall()
-        rows_number = cur.execute("SELECT COUNT(*) FROM clients;").fetchall()
-        rows_number = rows_number[0]["COUNT(*)"] ##Total of rows in db
     
     pages_number = ceil(rows_number / actual_results_per_page)   
 
@@ -92,7 +104,6 @@ def api_all():
     actual_page = actual_page)
 
     conn.close()
-
 
 ##Delete method:
 

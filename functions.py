@@ -27,8 +27,6 @@ def create_sql_query(filter_parameters,actual_results_per_page,offset):
     if query.endswith("AND"):
         query = query[:-4]
 
-    query = query + f" LIMIT {actual_results_per_page} OFFSET {offset};"
-
     return query,to_filter
 
 def pagination(request,session):
