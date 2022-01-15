@@ -1,4 +1,4 @@
-def create_sql_query(filter_parameters,actual_results_per_page,offset):
+def create_sql_query(filter_parameters):
 
     query = "SELECT * FROM clients WHERE"
     to_filter = []
@@ -55,3 +55,20 @@ def pagination(request,session):
     offset = actual_page * actual_results_per_page
 
     return actual_results_per_page, offset, actual_page
+
+def dict_factory(cursor, row):
+    dictionary = {}
+    for idx, col in enumerate(cursor.description):
+        dictionary[col[0]] = row[idx]
+    return dictionary
+
+def get_query_parameters():
+    query_parameters = request.args
+    customer = query_parameters.get('customer')
+    country = query_parameters.get('country')
+    region = query_parameters.get('region')
+    sp = query_parameters.get('sp')
+    sh = query_parameters.get('sh')
+    sort = query_parameters.get('sort')
+    parameters = [customer,country,region,sp,sh,sort]
+    return parameters
