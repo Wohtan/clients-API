@@ -50,7 +50,10 @@ def api_all():
     conn.row_factory = dict_factory
     cur = conn.cursor() 
 
-    filter_parameters = []
+    if "filter_parameters" in session:
+        pass
+    else:
+        session["filter_parameters"] = []
 
     ## Sort request?
     if "sort_by" in session:
@@ -86,10 +89,10 @@ def api_all():
         region = request.form["region"]
         sp = request.form["sp"]
         sh = request.form["sh"] 
-        filter_parameters = [customer,country,region,sp,sh]
+        session["filter_parameters"] = [customer,country,region,sp,sh]
 
         # SQL query creation and storage in session
-        query,to_filter = create_sql_query(filter_parameters,actual_results_per_page,offset)
+        query,to_filter = create_sql_query(session["filter_parameters"],actual_results_per_page,offset)
         session["query"] = query
         session["to_filter"] = to_filter
 
@@ -117,19 +120,18 @@ def api_all():
     results = results, 
     pages_number = pages_number,
     actual_page = actual_page,
-    filter_parameters = filter_parameters)
+    filter_parameters = session["filter_parameters"])
 
     conn.close()
 
 
 @app.route('/api/v1/resources/clients/clear')
 def clear():
-    try:
-        session.pop("query")
-        session.pop("to_filter")
-        session["sort_by"] = ""
-    finally:
-        return redirect(url_for("api_all"))
+    session.pop("query","")
+    session.pop("to_filter","")
+    session.pop("sort_by","")
+    session.pop("filter_parameters")
+    return redirect(url_for("api_all"))
 
 ##Delete method:
 @app.route('/api/v1/resources/clients/delete', methods=['GET','DELETE'])
