@@ -3,14 +3,6 @@
 {% block body %}
 
 
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
- <p>{{ message }}</p>
-{% endfor %}
-{% endif %}
-{% endwith %}
-
 <div class="container pt-3">
     <h3>Edit a customer</h3>
     <form action="/api/v1/resources/clients/update?id={{results[0]}}" method = "POST">

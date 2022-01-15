@@ -1,38 +1,6 @@
-import enum
-from sys import setrecursionlimit
-from unittest.util import sorted_list_difference
-import flask
-from flask import request, render_template, redirect, url_for, flash, session
-import sqlite3
-from math import ceil
-
-from flask.templating import render_template_string
-from functions import *
-
-app = flask.Flask(__name__)
-
-if __name__ == "__main__":
-    app.config["DEBUG"] = True
-
-def dict_factory(cursor, row):
-    dictionary = {}
-    for idx, col in enumerate(cursor.description):
-        dictionary[col[0]] = row[idx]
-    return dictionary
-
-def get_query_parameters():
-    query_parameters = request.args
-    customer = query_parameters.get('customer')
-    country = query_parameters.get('country')
-    region = query_parameters.get('region')
-    sp = query_parameters.get('sp')
-    sh = query_parameters.get('sh')
-    sort = query_parameters.get('sort')
-    parameters = [customer,country,region,sp,sh,sort]
-    return parameters
-   
-app.secret_key = "keypass"
-
+from init import *
+from functions import*
+  
 @app.route('/', methods=['GET'])
 def home():
     return redirect(url_for("api_all"))
@@ -92,7 +60,7 @@ def api_all():
         session["filter_parameters"] = [customer,country,region,sp,sh]
 
         # SQL query creation and storage in session
-        query,to_filter = create_sql_query(session["filter_parameters"],actual_results_per_page,offset)
+        query,to_filter = create_sql_query(session["filter_parameters"])
         session["query"] = query
         session["to_filter"] = to_filter
 
@@ -135,6 +103,7 @@ def clear():
 
 ##Delete method:
 @app.route('/api/v1/resources/clients/delete', methods=['GET','DELETE'])
+@login_required
 def api_delete():
     query_parameters = request.args
     id = query_parameters.get("id")
@@ -155,9 +124,10 @@ def api_delete():
 
     return redirect(url_for('api_all'))
 
- #Form render
+ #Create form render
 
 @app.route('/api/v1/resources/clients/create')
+@login_required
 def render_form():
     return render_template("create.html")
 
@@ -194,6 +164,7 @@ def add():
 ##Edit form: //This route allows to bring the Client data as a placeholder in the form
 
 @app.route('/api/v1/resources/clients/edit', methods=['GET'])
+@login_required
 def edit():
     query_parameters = request.args
     id = query_parameters.get("id")
@@ -210,6 +181,7 @@ def edit():
 
 @app.route('/api/v1/resources/clients/update', methods = ['GET','POST'])
 def update():
+
     query_parameters = request.args
     id = query_parameters.get("id")
 
@@ -234,6 +206,37 @@ def update():
 
     conn.close()
     
+    return redirect(url_for('api_all'))
+
+##Login manager
+@login_manager.user_loader
+def load_user(user_id):
+    for user in users:
+        if user.id == int(user_id):
+            return user
+    return None
+
+##Login function:
+
+@app.route('/api/v1/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('api_all'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = get_user(form.user.data)
+        if user is not None and user.check_password(form.password.data):
+            login_user(user)
+            next_page = request.args.get('next')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('api_all')
+            return redirect(next_page)
+    return render_template('login.html', form=form)
+
+##Logout:
+@app.route('/api/v1//logout')
+def logout():
+    logout_user()
     return redirect(url_for('api_all'))
 
 app.run()
