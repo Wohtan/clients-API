@@ -27,8 +27,10 @@ def api_all():
     if "sort_by" in session:
         sort_by = request.args.get("sort_by")
         if sort_by:
-            session["sort_by"] = f" ORDER BY {sort_by}"  
-
+            if sort_by == "customer":
+                session["sort_by"] = f" ORDER BY CAST(customer as INTEGER)" ##This solves the enumeration 1,10,11 issue 
+            else:
+                session["sort_by"] = f" ORDER BY {sort_by}"  
     else:
         session["sort_by"] = ""
 
