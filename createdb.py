@@ -8,7 +8,7 @@ def readcsv():
 
         #Open the file and append the names to the list
         with open("clients.csv") as file:
-            reader = csv.reader(file, delimiter = ";")
+            reader = csv.reader(file, delimiter = ",")
             #Skips the header
             next(file)
             for i in reader:

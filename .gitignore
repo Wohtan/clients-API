@@ -1,1 +1,3 @@
 .vscode
+clients.db
+__pycache__
