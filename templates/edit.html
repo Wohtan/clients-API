@@ -3,14 +3,6 @@
 {% block body %}
 
 
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
- <p>{{ message }}</p>
-{% endfor %}
-{% endif %}
-{% endwith %}
-
 <div class="container pt-3">
     <h3>Edit a customer</h3>
     <form action="/api/v1/resources/clients/update?id={{results[0]}}" method = "POST">
@@ -28,11 +20,11 @@
         </div> 
 
         <div class="form-group">
-        <input type="text" name="sp" placeholder="Sold to party" required value="{{results[4]}}">
+        <input type="number" name="sp" placeholder="Sold to party" required value="{{results[4]}}">
         </div>
 
         <div class="form-group">
-        <input type="text" name="sh" placeholder="Ship to party" required value="{{results[5]}}">
+        <input type="number" name="sh" placeholder="Ship to party" required value="{{results[5]}}">
         </div>
 
         <div class="form-group pt-2 mx-auto">     
