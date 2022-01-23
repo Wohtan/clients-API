@@ -1,13 +1,26 @@
 from init import *
 from functions import*
+
+
+app = flask.Flask(__name__)
+
+if __name__ == "__main__":
+    app.config["DEBUG"] = True
+    app.run()
+    
+app.secret_key = "keypass"
+login_manager = LoginManager(app)
+login_manager.login_view = "/api/v1/login"
+
   
 @app.route('/', methods=['GET'])
 def home():
-    return redirect(url_for("api_all"))
+    return (redirect(url_for("api_all")))
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return "<h1>404</h1><p>The resource could not be found.</p>", 404
+    flash("The resource could not be found")
+    return (redirect(url_for("api_all"))),404
 
 @app.route('/api/v1/resources/clients/all', methods=['GET','POST'])
 def api_all():
@@ -176,7 +189,9 @@ def edit():
     cur = conn.cursor()
 
     results = cur.execute(query).fetchall()[0]
- 
+
+    conn.close() 
+
     return render_template ("edit.html", results = results)
 
 ##Update action:
@@ -241,4 +256,3 @@ def logout():
     logout_user()
     return redirect(url_for('api_all'))
 
-app.run()

@@ -13,15 +13,3 @@ from forms import *
 from flask_login import LoginManager,login_user,logout_user,login_required,current_user
 from models import *
 from werkzeug.urls import url_parse
-
-app = flask.Flask(__name__)
-
-# if __name__ == "__main__":
-#     app.config["DEBUG"] = True
-
-app.debug = True
-
-app.secret_key = "keypass"
-login_manager = LoginManager(app)
-login_manager.login_view = "/api/v1/login"
-
