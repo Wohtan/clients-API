@@ -19,8 +19,7 @@ def home():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    flash("The resource could not be found")
-    return (redirect(url_for("api_all"))),404
+    return (redirect(url_for("api_all")))
 
 @app.route('/api/v1/resources/clients/all', methods=['GET','POST'])
 def api_all():
@@ -127,15 +126,18 @@ def api_delete():
     conn = sqlite3.connect('clients.db')
     conn.row_factory = dict_factory
     cur = conn.cursor()
+  
 
-    name = cur.execute(f"SELECT customer from clients where id = {id}").fetchall()[0]
-    cur.execute(query)
-
-    
-    flash(f"The customer {name['customer']} has been deleted")
-
-    conn.commit()
-    conn.close()
+    try:
+        name = cur.execute(f"SELECT customer from clients where id = {id}").fetchall()[0]
+        cur.execute(query)
+        flash(f"The customer {name['customer']} has been deleted")
+        conn.commit()
+        conn.close()
+    except:
+        flash("This resource was already deleted")
+        return(redirect(url_for('api_all')))
+        
 
     return redirect(url_for('api_all'))
 
@@ -250,9 +252,9 @@ def login():
             return redirect(next_page)
     return render_template('login.html', form=form)
 
-##Logout:
-@app.route('/api/v1//logout')
-def logout():
-    logout_user()
-    return redirect(url_for('api_all'))
+# ##Logout:
+# @app.route('/api/v1//logout')
+# def logout():
+#     logout_user()
+#     return redirect(url_for('api_all'))
 
