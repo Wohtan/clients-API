@@ -127,7 +127,7 @@ def api_delete():
     conn.row_factory = dict_factory
     cur = conn.cursor()
   
-
+    ##This solves the error when double clicking the button
     try:
         name = cur.execute(f"SELECT customer from clients where id = {id}").fetchall()[0]
         cur.execute(query)
@@ -136,6 +136,7 @@ def api_delete():
         conn.close()
     except:
         flash("This resource was already deleted")
+        conn.close()
         return(redirect(url_for('api_all')))
         
 
@@ -211,15 +212,23 @@ def update():
         sp = request.form["sp"]
         sh = request.form["sh"]  
 
+
     query = f"""UPDATE clients
     SET customer = ?, country = ?,
     region = ?, sp = ?, sh = ? WHERE id = {id}"""  
 
+
     conn = sqlite3.connect("clients.db")
     cur = conn.cursor()
 
-    cur.execute(query,(customer,country,region,sp,sh))
-    conn.commit()
+    try:
+        cur.execute(query,(customer,country,region,sp,sh))
+        conn.commit()
+
+    except sqlite3.IntegrityError: ##If unique condition is broken
+        flash("Given data already exists")
+        conn.close()
+        return(redirect(url_for('api_all')))
 
     flash(f"The client {customer} has been sucesfully updated")
 
